@@ -1131,7 +1131,8 @@ Client.find_tags_async = function(self, term, callback, opts)
       for match in iter(search.find_tags(line)) do
         local m_start, m_end, _ = unpack(match)
         local tag = string.sub(line, m_start + 1, m_end)
-        if string.match(tag, "^" .. search.Patterns.TagCharsRequired .. "$") then
+        local match2 = vim.fn.trim(vim.fn.system({"rg", "-o", "-m", "1", "^" .. search.Patterns.TagCharsRequired .. "$" },tag),"\n",2)
+        if match2 ~= "" then
           add_match(tag, path, note, match_data.line_number, line, m_start, m_end)
         end
       end

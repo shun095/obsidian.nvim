@@ -62,14 +62,17 @@ return function(client, data)
   if vim.tbl_isempty(tags) then
     -- Check for visual selection.
     local viz = api.get_visual_selection { strict = true }
-    if viz and #viz.lines == 1 and string.match(viz.selection, "^#?" .. search.Patterns.TagCharsRequired .. "$") then
-      local tag = viz.selection
+    if viz and #viz.lines == 1 then
+      local match = vim.fn.trim(vim.fn.system({"rg", "-o", "-m", "1", "^#?" .. search.Patterns.TagCharsRequired .. "$" },viz.selection),"\n",2)
+      if match ~= "" then
+        local tag = viz.selection
 
-      if vim.startswith(tag, "#") then
-        tag = string.sub(tag, 2)
+        if vim.startswith(tag, "#") then
+          tag = string.sub(tag, 2)
+        end
+
+        tags = { tag }
       end
-
-      tags = { tag }
     else
       -- Otherwise check for a tag under the cursor.
       local tag = api.cursor_tag()

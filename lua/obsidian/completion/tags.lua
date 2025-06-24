@@ -5,14 +5,14 @@ local M = {}
 
 ---@type { pattern: string, offset: integer }[]
 local TAG_PATTERNS = {
-  { pattern = "[%s%(]#" .. Patterns.TagCharsOptional .. "$", offset = 2 },
+  { pattern = "[\\s\\(]#" .. Patterns.TagCharsOptional .. "$", offset = 2 },
   { pattern = "^#" .. Patterns.TagCharsOptional .. "$", offset = 1 },
 }
 
 M.find_tags_start = function(input)
   for _, pattern in ipairs(TAG_PATTERNS) do
-    local match = string.match(input, pattern.pattern)
-    if match then
+    local match = vim.fn.trim(vim.fn.system({"rg", "-o", "-m", "1", pattern.pattern },input),"\n",2)
+    if match ~= "" then
       return string.sub(match, pattern.offset + 1)
     end
   end
@@ -31,7 +31,7 @@ end
 ---@return boolean, string|?, boolean|?
 M.can_complete = function(request)
   local search = M.find_tags_start(request.context.cursor_before_line)
-  if not search or string.len(search) == 0 then
+  if not search then
     return false
   end
 
